@@ -17,28 +17,19 @@ func SetupRoutes(app *fiber.App) {
 
 	// Product routes (Admin only)
 	product := api.Group("/products")
-	product.Use(middleware.AdminOnly)                  // Middleware untuk semua rute produk
-	product.Get("/", controllers.GetProducts)         // Mendapatkan semua produk
+	product.Use(middleware.AdminOnly)                 // Middleware untuk semua rute produk (hanya admin)
+	product.Get("/", controllers.GetProduct)          // Mendapatkan semua produk
 	product.Post("/", controllers.CreateProduct)      // Menambahkan produk baru
 	product.Put("/:id", controllers.UpdateProduct)    // Memperbarui produk berdasarkan ID
 	product.Delete("/:id", controllers.DeleteProduct) // Menghapus produk berdasarkan ID
 
-	// Transaction routes
+	// Transaction routes (User only)
 	transaction := api.Group("/transactions")
-
-	// Rute untuk user dan admin
-	transaction.Get("/", controllers.GetTransactions)
-
-	// Rute hanya untuk user
-	userTransaction := transaction.Group("")
-	userTransaction.Use(middleware.UserOnly) // Middleware untuk pengguna biasa
-	userTransaction.Post("/", controllers.CreateTransactions)
-	userTransaction.Put("/:id", controllers.UpdateTransactions)
-
-	// Rute hanya untuk admin
-	adminTransaction := transaction.Group("")
-	adminTransaction.Use(middleware.AdminOnly) // Middleware untuk admin
-	adminTransaction.Delete("/:id", controllers.DeleteTransactions)
+	transaction.Use(middleware.UserOnly)                       // Middleware untuk semua rute transaksi (hanya user)
+	transaction.Get("/", controllers.GetTransactions)          // Mendapatkan semua transaksi pengguna
+	transaction.Post("/", controllers.CreateTransactions)      // Membuat transaksi baru
+	transaction.Put("/:id", controllers.UpdateTransactions)    // Memperbarui transaksi berdasarkan ID
+	transaction.Delete("/:id", controllers.DeleteTransactions) // Menghapus transaksi berdasarkan ID (opsional, jika diperlukan user)
 
 	// Global error handler for invalid routes
 	app.Use(func(c *fiber.Ctx) error {

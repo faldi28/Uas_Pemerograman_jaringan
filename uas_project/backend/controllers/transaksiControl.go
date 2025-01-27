@@ -3,23 +3,32 @@ package controllers
 import (
 	database "uas_project/config"
 	"uas_project/models"
+	"uas_project/websocket"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-// Create a new transaction
+// Fungsi untuk menangani transaksi
 func CreateTransactions(c *fiber.Ctx) error {
-	transaction := new(models.Transaction)
-	if err := c.BodyParser(transaction); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Cannot parse body"})
+	var transaction models.Transaction
+	if err := c.BodyParser(&transaction); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid input",
+		})
 	}
 
-	result := database.DB.Create(&transaction)
-	if result.Error != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": result.Error.Error()})
+	// Simpan transaksi ke database
+	if err := database.DB.Create(&transaction).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to create transaction",
+		})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(transaction)
+	// Kirim notifikasi transaksi baru ke semua klien melalui WebSocket
+	websocket.BroadcastTransaction(transaction)
+
+	// Mengembalikan respons transaksi yang baru dibuat
+	return c.Status(fiber.StatusOK).JSON(transaction)
 }
 
 // Get all transactions

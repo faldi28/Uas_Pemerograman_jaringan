@@ -13,7 +13,9 @@ func CreateProduct(c *fiber.Ctx) error {
 	if err := c.BodyParser(product); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Cannot parse body"})
 	}
-
+	if product.Name == "" || product.Stock < 0 || product.Price < 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid product data"})
+	}
 	result := database.DB.Create(&product)
 	if result.Error != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": result.Error.Error()})
@@ -23,7 +25,7 @@ func CreateProduct(c *fiber.Ctx) error {
 }
 
 // Get all products
-func GetProducts(c *fiber.Ctx) error {
+func GetProduct(c *fiber.Ctx) error {
 	var products []models.Product
 	result := database.DB.Find(&products)
 	if result.Error != nil {

@@ -7,9 +7,29 @@ import RegisterUser from "./components/RegisterUser";
 import RegisterAdmin from "./components/RegisterAdmin";
 import ProductList from "./components/ProductList";
 import TransactionList from "./components/TransactionList"; 
-import TransactionForm from "./components/TransactionForm"; 
-import DashboardAdmin from "./components/DashboardAdmin"; 
-import DashboardUser from "./components/DashboardUser"; 
+
+// Error Boundary Component for better error handling
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("Error caught in boundary:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <div>Something went wrong. Please try again later.</div>;
+    }
+    return this.props.children;
+  }
+}
 
 const App = () => {
   const [role, setRole] = useState(null);
@@ -17,8 +37,13 @@ const App = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      const decoded = jwtDecode(token);
-      setRole(decoded.role);
+      try {
+        const decoded = jwtDecode(token);
+        setRole(decoded.role);
+      } catch (error) {
+        console.error("Invalid token", error);
+        setRole(null);  // Handle invalid token gracefully
+      }
     }
   }, []);
 
@@ -28,55 +53,29 @@ const App = () => {
   }
 
   return (
-    <Router>
-      <Routes>
-        {/* Login and Register Pages */}
-        <Route path="/login-user" element={<LoginUser />} />
-        <Route path="/login-admin" element={<LoginAdmin />} />
-        <Route path="/register-user" element={<RegisterUser />} />
-        <Route path="/register-admin" element={<RegisterAdmin />} />
-        
-        {/* Role Dashboard */}
-        <Route 
-          path="/dashboard-admin" 
-          element={role === 'admin' ? <DashboardAdmin /> : <Navigate to="/login-admin" />} 
-        />
-        <Route 
-          path="/dashboard-user" 
-          element={role === 'user' ? <DashboardUser /> : <Navigate to="/login-user" />} 
-        />
+    <ErrorBoundary>
+      <Router>
+        <Routes>
+          {/* Login and Register Pages */}
+          <Route path="/login-user" element={<LoginUser />} />
+          <Route path="/login-admin" element={<LoginAdmin />} />
+          <Route path="/register-user" element={<RegisterUser />} />
+          <Route path="/register-admin" element={<RegisterAdmin />} />
+          
+          {/* Admin only page for managing products */}
+          <Route
+            path="/products"
+            element={role === "admin" ? <ProductList /> : <Navigate to="/login-admin" />}
+          />
 
-        {/* routes admin */}
-        <Route 
-          path="/products" 
-          element={role === 'admin' ? <ProductList /> : <Navigate to="/login-admin" />} 
-        />
-
-        {/* List transaksi untuk admin */}
-        <Route 
-          path="/transactions" 
-          element={role === 'admin' ? <TransactionList /> : <Navigate to="/login-user" />} 
-        />
-        
-        {/* hanya admin yang bisa delete */}
-        <Route 
-          path="/transactions/delete/:id" 
-          element={role === 'admin' ? <TransactionList /> : <Navigate to="/login-admin" />} 
-        />
-
-         {/* Hanya User yang bisa edit*/}
-         <Route 
-          path="/transactions/edit/:id" 
-          element={role === 'admin' ? <TransactionList /> : <Navigate to="/login-admin" />} 
-        />
-
-        {/* Hanya user yang bisa post */}
-        <Route 
-          path="/transactions/add" 
-          element={role === 'user' ? <TransactionForm /> : <Navigate to="/login-user" />} 
-        />
-      </Routes>
-    </Router>
+          {/* User only page for viewing transactions */}
+          <Route
+            path="/transactions"
+            element={role === "user" ? <TransactionList /> : <Navigate to="/login-user" />}
+          />
+        </Routes>
+      </Router>
+    </ErrorBoundary>
   );
 };
 

@@ -56,6 +56,7 @@ func RegisterHandler(c *fiber.Ctx) error {
 }
 
 // LoginHandler: Autentikasi pengguna
+// LoginHandler: Autentikasi pengguna
 func LoginHandler(c *fiber.Ctx) error {
 	type LoginRequest struct {
 		Username string `json:"username"`
@@ -90,5 +91,9 @@ func LoginHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not generate token"})
 	}
 
-	return c.JSON(fiber.Map{"token": tokenString})
+	// Return token and role
+	return c.JSON(fiber.Map{
+		"token": tokenString,
+		"role":  user.Role, // Return the role
+	})
 }

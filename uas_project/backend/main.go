@@ -34,7 +34,6 @@ func main() {
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization", // Menambahkan Authorization
 	}))
 
-	
 	// Routes
 	routes.SetupRoutes(app)
 

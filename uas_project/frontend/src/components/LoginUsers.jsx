@@ -8,14 +8,14 @@ const LoginUser = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleLoginUser = async (e) => {
     e.preventDefault();
     try {
       const { data } = await API.post("/login", { username, password });
       console.log(data);  // Log data untuk melihat respons API
       if (data.role === "user") {
         localStorage.setItem("token", data.token);
-        navigate("/dashboard-user");  // Arahkan ke halaman dashboard-user
+        navigate("/transactions");  // Arahkan ke halaman dashboard-user
       } else {
         setError("You are not authorized to access this page.");
       }
@@ -38,7 +38,7 @@ const LoginUser = () => {
             {error}
           </p>
         )}
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleLoginUser}>
           <div className="field mb-4">
             <label className="label is-size-6">Username</label>
             <div className="control">

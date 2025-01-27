@@ -8,18 +8,24 @@ const LoginAdmin = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleLoginAdmin = async (e) => {
     e.preventDefault();
     try {
       const { data } = await API.post("/login", { username, password });
+      console.log("Login Response:", data); // Verifikasi respons dari server
+
+      // Cek apakah role adalah "admin"
       if (data.role === "admin") {
         localStorage.setItem("token", data.token);
-        navigate("/dashboard-admin"); // Arahkan ke halaman dashboard admin
+        console.log("Token:", data.token); // Verifikasi token berhasil disimpan
+        
+        // Navigasi ke halaman products setelah login berhasil
+        navigate("/products", { replace: true });
       } else {
         setError("You are not authorized to access this page.");
-        navigate("/dashboard-user"); // Jika bukan admin, arahkan ke dashboard user
       }
     } catch (err) {
+      console.log("Login Error:", err.response?.data || err.message); // Menangkap error dari request API
       setError("Login failed. Please check your credentials.");
     }
   };
@@ -37,7 +43,7 @@ const LoginAdmin = () => {
             {error}
           </p>
         )}
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleLoginAdmin}>
           <div className="field mb-4">
             <label className="label is-size-6">Username</label>
             <div className="control">

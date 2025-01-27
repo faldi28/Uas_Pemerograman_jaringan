@@ -35,7 +35,7 @@ const RegisterAdmin = () => {
               <input
                 className="input is-medium"
                 type="text"
-                placeholder="Enter user username"
+                placeholder="Enter admin username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
@@ -47,7 +47,7 @@ const RegisterAdmin = () => {
               <input
                 className="input is-medium"
                 type="password"
-                placeholder="Enter user password"
+                placeholder="Enter admin password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
